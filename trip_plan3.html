@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Invitation</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #83a4d4, #b6fbff);
+            text-align: center;
+        }
+
+        .container {
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #yesBtn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        #noBtn {
+            background: #f44336;
+            color: white;
+        }
+
+        .crying-croc {
+            position: fixed;
+            bottom: -100px;
+            right: 20px;
+            font-size: 80px;
+            transition: all 1s ease;
+        }
+
+        .show-croc {
+            bottom: 20px;
+        }
+
+        .celebration-gif {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 300px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="message">Do you want to go on a trip with us?</h1>
+        <div class="buttons">
+            <button id="yesBtn">Yes!</button>
+            <button id="noBtn">No</button>
+        </div>
+    </div>
+
+    <div class="crying-croc">🐊😭</div>
+    <img src="https://i.gifer.com/7ef9.gif" class="celebration-gif" alt="celebration">
+    <audio id="celebrationSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        const messages = [
+            "Man bhi ja bhai!",
+            "Seriously nahi jaoge?",
+            "Ek baar aur soch lo!",
+            "Mazaak kar raha hai na?",
+            "Please bhai!",
+            "Aakhir tak try karoonga!",
+            "Tumse na ho payega!",
+            "Chalo last chance!",
+            "Okay, main haar gaya 😢"
+        ];
+
+        let clickCount = localStorage.getItem('noClickCount') || 0;
+        const croc = document.querySelector('.crying-croc');
+        const celebrationGif = document.querySelector('.celebration-gif');
+        const celebrationAudio = document.getElementById('celebrationSound');
+
+        // Initial message setup
+        document.getElementById('message').textContent = clickCount > 0 
+            ? messages[Math.min(clickCount - 1, messages.length - 1)] 
+            : "Do you want to go on a trip with us?";
+
+        // No button handler
+        document.getElementById('noBtn').addEventListener('click', () => {
+            clickCount++;
+            localStorage.setItem('noClickCount', clickCount);
+            
+            // Show crying crocodile animation
+            croc.classList.add('show-croc');
+            setTimeout(() => {
+                croc.classList.remove('show-croc');
+            }, 2000);
+
+            // Update message
+            document.getElementById('message').textContent = 
+                messages[Math.min(clickCount - 1, messages.length - 1)];
+        });
+
+        // Yes button handler
+        document.getElementById('yesBtn').addEventListener('click', () => {
+            localStorage.removeItem('noClickCount');
+            
+            // Show celebration elements
+            celebrationGif.style.display = 'block';
+            celebrationAudio.play();
+            
+            // Remove buttons and update message
+            document.querySelector('.buttons').remove();
+            document.getElementById('message').innerHTML = 
+                '<span class="celebration">Yay! Let\'s Gooooo 🎉<br>Check your email for details!</span>';
+
+            // Confetti effect
+            const count = 200;
+            const defaults = { origin: { y: 0.7 } };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
+
+            // Hide gif after 5 seconds
+            setTimeout(() => {
+                celebrationGif.style.display = 'none';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
